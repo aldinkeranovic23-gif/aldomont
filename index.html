@@ -69,7 +69,13 @@ async function saveOffer(e){e.preventDefault();if(!canManage())return;const clie
 const total=rows.reduce((s,r)=>s+r.quantity*r.unit_price,0);$('saveOfferBtn').disabled=true;
 const offer={offer_number:nextOfferNumber(),client_id:clientId,job_id:null,description:$('offerDescription').value.trim()||null,status:'pending',total,valid_until:$('validUntil').value||null};
 const {data,error}=await supabase.from('offers').insert(offer).select('id').single();if(error){$('saveOfferBtn').disabled=false;showMsg('appMsg','Ponuda nije sačuvana: '+error.message,true);return}
-const items=rows.map(r=>({...r,offer_id:data.id,total:r.quantity*r.unit_price}));
+const items = rows.map(r => ({
+  offer_id: data.id,
+  description: r.description,
+  quantity: r.quantity,
+  unit: r.unit,
+  unit_price: r.unit_price
+}));
 const {error:itemError}=await supabase.from('offer_items').insert(items);$('saveOfferBtn').disabled=false;
 if(itemError){showMsg('appMsg','Ponuda je kreirana, ali stavke nisu sačuvane: '+itemError.message+'. Nemoj ponavljati unos; javi mi ovu poruku.',true);return}
 resetOffer();await loadOffers();await refreshStats();showMsg('appMsg','Ponuda '+offer.offer_number+' je uspješno sačuvana.')}
