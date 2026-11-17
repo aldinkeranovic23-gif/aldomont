@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b121a"><title>GAT Technology · Poslovanje</title>
+<style>
+:root{--bg:#0b121a;--panel:#121e2a;--line:#26384a;--txt:#edf3f8;--muted:#91a3b5;--blue:#397fc3;--red:#a94444}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px system-ui,sans-serif}.wrap{max-width:1120px;margin:auto;padding:22px}.brand{display:flex;gap:12px;align-items:center;margin:8px 0 26px}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#6eb6ff,#2865a6);display:grid;place-items:center;color:#071321;font-weight:900}.muted{color:var(--muted)}h1{font-size:25px;margin:0 0 6px}h2{font-size:19px;margin:0 0 15px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:15px}.login{max-width:440px;margin:8vh auto}.field{display:grid;gap:6px;margin:12px 0}.field label{color:var(--muted);font-size:13px}.field input,.field select,.field textarea{width:100%;padding:11px;border:1px solid var(--line);background:#0c1721;color:var(--txt);border-radius:9px;font:inherit}.field textarea{min-height:75px;resize:vertical}.btn{padding:10px 14px;border:1px solid var(--line);background:#1b2d3e;color:var(--txt);border-radius:9px;font:inherit;cursor:pointer}.btn:disabled{opacity:.5}.primary{background:var(--blue);border-color:var(--blue);color:white}.danger{background:#3b2227;border-color:#684047}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{font-size:28px;font-weight:750;margin-top:10px}.hidden{display:none!important}.msg{padding:11px;border-radius:9px;background:#263746;margin:12px 0}.error{background:#402629;color:#ffcaca}.tag{font-size:12px;color:#a9d2ff;background:#23394a;border-radius:20px;padding:5px 9px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tabs button.active{background:var(--blue)}table{width:100%;border-collapse:collapse;min-width:520px}td,th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:12px;color:var(--muted)}.table-scroll{overflow-x:auto}.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}.itemrow{display:grid;grid-template-columns:2fr .7fr .8fr .9fr auto;gap:7px;align-items:end;margin:8px 0}.itemrow input{min-width:0;width:100%;padding:9px;border:1px solid var(--line);background:#0c1721;color:var(--txt);border-radius:8px}.total{text-align:right;font-size:20px;font-weight:750;margin:14px 0}.actions{display:flex;gap:7px;flex-wrap:wrap}.empty{padding:20px 0;color:var(--muted)}@media(max-width:720px){.wrap{padding:14px}.panel{padding:15px}.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.itemrow{grid-template-columns:1.5fr .65fr .8fr .9fr auto}.itemrow input{font-size:13px;padding:8px}}
+</style>
+</head>
+<body><div class="wrap">
+<header class="brand"><div class="logo">G</div><div><b>GAT Technology</b><br><small class="muted">Poslovno upravljanje</small></div></header>
+<section id="login" class="panel login"><h1>Prijava</h1><p class="muted">Prijavi se svojim korisničkim računom.</p><div id="loginMsg" class="msg hidden"></div>
+<form id="loginForm"><div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required value="aldin.keranovic23@gmail.com"></div><div class="field"><label for="password">Lozinka</label><input id="password" type="password" autocomplete="current-password" required></div><button class="btn primary" id="loginBtn">Prijavi se</button></form></section>
+<section id="app" class="hidden">
+<div class="row"><div><h1 id="welcome">Pregled poslovanja</h1><span id="role" class="tag">Korisnik</span></div><button id="logout" class="btn">Odjava</button></div>
+<div id="appMsg" class="msg hidden"></div>
+<div class="grid" style="margin-top:16px"><div class="panel"><span class="muted">Aktivni poslovi</span><div id="jobsCount" class="stat">—</div></div><div class="panel"><span class="muted">Klijenti</span><div id="clientsCount" class="stat">—</div></div><div class="panel"><span class="muted">Ponude</span><div id="offersCount" class="stat">—</div></div><div class="panel"><span class="muted">Radnici</span><div id="workersCount" class="stat">—</div></div></div>
+<div class="tabs"><button class="btn active" data-view="clients">Klijenti</button><button class="btn" data-view="offers">Ponude</button><button class="btn" data-view="overview">Pregled</button></div>
+<section id="clientsView" class="panel">
+<div class="row"><h2>Klijenti</h2><button class="btn primary" id="newClientBtn">+ Novi klijent</button></div>
+<form id="clientForm" class="hidden"><input type="hidden" id="clientId"><div class="two">
+<div class="field"><label>Ime i prezime / naziv</label><input id="clientName" required maxlength="160"></div>
+<div class="field"><label>Telefon</label><input id="clientPhone" maxlength="60"></div>
+<div class="field"><label>E-mail</label><input id="clientEmail" type="email" maxlength="160"></div>
+<div class="field"><label>Adresa</label><input id="clientAddress" maxlength="250"></div></div>
+<div class="actions"><button class="btn primary" type="submit">Sačuvaj klijenta</button><button class="btn" type="button" id="cancelClient">Odustani</button></div></form>
+<div id="clientsTable" class="table-scroll empty">Učitavanje…</div>
+</section>
+<section id="offersView" class="panel hidden">
+<div class="row"><h2>Ponude</h2><button class="btn primary" id="newOfferBtn">+ Nova ponuda</button></div>
+<form id="offerForm" class="hidden">
+<div class="two"><div class="field"><label>Klijent</label><select id="offerClient" required><option value="">Odaberi klijenta</option></select></div><div class="field"><label>Važi do</label><input id="validUntil" type="date"></div></div>
+<div class="field"><label>Opis ponude</label><textarea id="offerDescription" placeholder="Npr. Elektroinstalacije, rasvjeta i montaža"></textarea></div>
+<h2>Stavke ponude</h2><div class="muted" style="font-size:13px">Unesi materijal ili uslugu, količinu, jedinicu i cijenu po jedinici.</div>
+<div id="items"></div><button class="btn" type="button" id="addItem">+ Dodaj stavku</button>
+<div class="total">Ukupno: <span id="offerTotal">0,00 KM</span></div>
+<div class="actions"><button class="btn primary" type="submit" id="saveOfferBtn">Sačuvaj ponudu</button><button class="btn" type="button" id="cancelOffer">Odustani</button></div>
+</form>
+<div id="offersTable" class="table-scroll empty">Učitavanje…</div>
+</section>
+<section id="overviewView" class="panel hidden"><h2>Pregled poslovanja</h2><p class="muted">Odaberi Klijenti ili Ponude za unos i pregled podataka.</p></section>
+</section></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SUPABASE_URL='https://tviagxfduewnrmsujowg.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_B_z17D3TVdAoVh4dlRmJOQ_knIiL8t8';
+const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const $=id=>document.getElementById(id);let profile=null,clients=[];
+function showMsg(id,t,err=false){$(id).textContent=t;$(id).classList.remove('hidden');$(id).classList.toggle('error',err)}
+function clearMsg(id){$(id).classList.add('hidden')}
+function money(n){return (Number(n)||0).toLocaleString('bs-BA',{minimumFractionDigits:2,maximumFractionDigits:2})+' KM'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function canManage(){return profile?.role==='owner'}
+async function loadProfile(user){const {data,error}=await supabase.from('profiles').select('full_name,role,client_id').eq('id',user.id).single();if(error)throw Error('Profil nije pronađen: '+error.message);profile=data;$('welcome').textContent='Dobro došao, '+(data.full_name||'korisniče');$('role').textContent=data.role;$('login').classList.add('hidden');$('app').classList.remove('hidden');if(!canManage()){showMsg('appMsg','Ova radna verzija trenutno omogućava uređivanje samo vlasniku naloga.',true)}await refreshAll()}
+async function count(table,filter){let q=supabase.from(table).select('*',{count:'exact',head:true});if(filter)q=filter(q);const {count,error}=await q;if(error)throw error;return count||0}
+async function refreshStats(){try{const [j,c,o,w]=await Promise.all([count('jobs',q=>q.neq('status','completed')),count('clients'),count('offers'),count('profiles',q=>q.eq('role','worker'))]);$('jobsCount').textContent=j;$('clientsCount').textContent=c;$('offersCount').textContent=o;$('workersCount').textContent=w}catch(e){showMsg('appMsg','Statistika: '+e.message,true)}}
+async function loadClients(){const {data,error}=await supabase.from('clients').select('id,name,phone,email,address,created_at').order('created_at',{ascending:false});if(error)throw error;clients=data||[];$('offerClient').innerHTML='<option value="">Odaberi klijenta</option>'+clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');if(!clients.length){$('clientsTable').innerHTML='<div class="empty">Još nema klijenata. Klikni „Novi klijent“ da dodaš prvog.</div>';return}
+$('clientsTable').innerHTML='<table><thead><tr><th>Klijent</th><th>Telefon</th><th>E-mail</th><th>Adresa</th><th>Akcija</th></tr></thead><tbody>'+clients.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone||'—')}</td><td>${esc(c.email||'—')}</td><td>${esc(c.address||'—')}</td><td><button class="btn" data-edit-client="${c.id}">Uredi</button></td></tr>`).join('')+'</tbody></table>';
+document.querySelectorAll('[data-edit-client]').forEach(b=>b.addEventListener('click',()=>editClient(b.dataset.editClient)))}
+function editClient(id){const c=clients.find(x=>x.id===id);if(!c)return;$('clientId').value=c.id;$('clientName').value=c.name||'';$('clientPhone').value=c.phone||'';$('clientEmail').value=c.email||'';$('clientAddress').value=c.address||'';$('clientForm').classList.remove('hidden');$('clientName').focus()}
+function resetClient(){$('clientForm').reset();$('clientId').value='';$('clientForm').classList.add('hidden')}
+async function saveClient(e){e.preventDefault();if(!canManage())return;const id=$('clientId').value;const row={name:$('clientName').value.trim(),phone:$('clientPhone').value.trim()||null,email:$('clientEmail').value.trim()||null,address:$('clientAddress').value.trim()||null};if(!row.name)return;const {error}=id?await supabase.from('clients').update(row).eq('id',id):await supabase.from('clients').insert(row);if(error){showMsg('appMsg','Klijent nije sačuvan: '+error.message,true);return}resetClient();await loadClients();await refreshStats();showMsg('appMsg',id?'Klijent je ažuriran.':'Klijent je dodan.')}
+function addItemRow(desc='',qty='1',unit='kom',price='0'){const div=document.createElement('div');div.className='itemrow';div.innerHTML=`<div class="field"><label>Opis</label><input class="it-desc" required value="${esc(desc)}" placeholder="Materijal / usluga"></div><div class="field"><label>Količina</label><input class="it-qty" type="number" min="0.01" step="0.01" required value="${qty}"></div><div class="field"><label>Jedinica</label><input class="it-unit" required value="${esc(unit)}" placeholder="kom/m/h"></div><div class="field"><label>Cijena (KM)</label><input class="it-price" type="number" min="0" step="0.01" required value="${price}"></div><button type="button" class="btn danger removeItem" aria-label="Ukloni">×</button>`;$('items').append(div);div.querySelectorAll('input').forEach(i=>i.addEventListener('input',calcTotal));div.querySelector('.removeItem').addEventListener('click',()=>{div.remove();calcTotal()});calcTotal()}
+function calcTotal(){let total=0;document.querySelectorAll('.itemrow').forEach(r=>{total+=(Number(r.querySelector('.it-qty').value)||0)*(Number(r.querySelector('.it-price').value)||0)});$('offerTotal').textContent=money(total);return total}
+function resetOffer(){$('offerForm').reset();$('items').innerHTML='';addItemRow();$('offerForm').classList.add('hidden');$('offerTotal').textContent=money(0)}
+function nextOfferNumber(){const d=new Date(),stamp=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');return 'GAT-'+stamp+'-'+String(Date.now()).slice(-5)}
+async function saveOffer(e){e.preventDefault();if(!canManage())return;const clientId=$('offerClient').value;if(!clientId){showMsg('appMsg','Odaberi klijenta.',true);return}const rows=[...document.querySelectorAll('.itemrow')].map(r=>({description:r.querySelector('.it-desc').value.trim(),quantity:Number(r.querySelector('.it-qty').value),unit:r.querySelector('.it-unit').value.trim(),unit_price:Number(r.querySelector('.it-price').value)}));if(!rows.length||rows.some(r=>!r.description||!r.unit||!(r.quantity>0)||r.unit_price<0)){showMsg('appMsg','Provjeri stavke ponude.',true);return}
+const total=rows.reduce((s,r)=>s+r.quantity*r.unit_price,0);$('saveOfferBtn').disabled=true;
+const offer={offer_number:nextOfferNumber(),client_id:clientId,job_id:null,description:$('offerDescription').value.trim()||null,status:'draft',total,valid_until:$('validUntil').value||null};
+const {data,error}=await supabase.from('offers').insert(offer).select('id').single();if(error){$('saveOfferBtn').disabled=false;showMsg('appMsg','Ponuda nije sačuvana: '+error.message,true);return}
+const items=rows.map(r=>({...r,offer_id:data.id}));
+const {error:itemError}=await supabase.from('offer_items').insert(items);$('saveOfferBtn').disabled=false;
+if(itemError){showMsg('appMsg','Ponuda je kreirana, ali stavke nisu sačuvane: '+itemError.message+'. Nemoj ponavljati unos; javi mi ovu poruku.',true);return}
+resetOffer();await loadOffers();await refreshStats();showMsg('appMsg','Ponuda '+offer.offer_number+' je uspješno sačuvana.')}
+async function loadOffers(){const {data,error}=await supabase.from('offers').select('id,offer_number,client_id,description,status,total,valid_until,created_at,clients(name)').order('created_at',{ascending:false});if(error)throw error;if(!data?.length){$('offersTable').innerHTML='<div class="empty">Još nema ponuda. Klikni „Nova ponuda“ da napraviš prvu.</div>';return}
+$('offersTable').innerHTML='<table><thead><tr><th>Broj</th><th>Klijent</th><th>Opis</th><th>Status</th><th>Ukupno</th><th>Važi do</th><th>Akcija</th></tr></thead><tbody>'+data.map(o=>`<tr><td>${esc(o.offer_number||'—')}</td><td>${esc(o.clients?.name||'—')}</td><td>${esc(o.description||'—')}</td><td>${esc(o.status||'—')}</td><td>${money(o.total)}</td><td>${esc(o.valid_until||'—')}</td><td><button class="btn danger" data-delete-offer="${o.id}">Obriši</button></td></tr>`).join('')+'</tbody></table>';
+document.querySelectorAll('[data-delete-offer]').forEach(b=>b.addEventListener('click',()=>deleteOffer(b.dataset.deleteOffer,b)))}
+
+async function deleteOffer(id,button){
+  if(!canManage())return;
+  if(!confirm('Da li sigurno želiš obrisati ovu ponudu? Ova radnja se ne može poništiti.'))return;
+  button.disabled=true;
+  try{
+    const {error:itemError}=await supabase.from('offer_items').delete().eq('offer_id',id);
+    if(itemError)throw itemError;
+    const {error}=await supabase.from('offers').delete().eq('id',id);
+    if(error)throw error;
+    await loadOffers();await refreshStats();
+    showMsg('appMsg','Ponuda je obrisana.');
+  }catch(e){
+    button.disabled=false;
+    showMsg('appMsg','Ponuda nije obrisana: '+e.message+'. Provjeri DELETE RLS pravila u Supabase.',true);
+  }
+}
+async function refreshAll(){await refreshStats();try{await loadClients();await loadOffers()}catch(e){showMsg('appMsg','Greška pri učitavanju podataka: '+e.message,true)}}
+function setView(v){['clients','offers','overview'].forEach(x=>$(x+'View').classList.toggle('hidden',x!==v));document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v))}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginBtn').disabled=true;const {data,error}=await supabase.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});$('loginBtn').disabled=false;if(error){showMsg('loginMsg','Prijava nije uspjela: '+error.message,true);return}try{await loadProfile(data.user)}catch(err){await supabase.auth.signOut();showMsg('loginMsg',err.message,true)}});
+$('logout').addEventListener('click',async()=>{await supabase.auth.signOut();profile=null;$('app').classList.add('hidden');$('login').classList.remove('hidden')});
+$('newClientBtn').addEventListener('click',()=>{$('clientForm').classList.remove('hidden');$('clientName').focus()});$('cancelClient').addEventListener('click',resetClient);$('clientForm').addEventListener('submit',saveClient);
+$('newOfferBtn').addEventListener('click',()=>{if(!clients.length){showMsg('appMsg','Prvo dodaj klijenta, pa onda napravi ponudu.',true);setView('clients');return}$('offerForm').classList.remove('hidden');$('items').innerHTML='';addItemRow()});
+$('cancelOffer').addEventListener('click',resetOffer);$('addItem').addEventListener('click',()=>addItemRow());$('offerForm').addEventListener('submit',saveOffer);
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+const {data:{session}}=await supabase.auth.getSession();if(session){try{await loadProfile(session.user)}catch(e){showMsg('loginMsg',e.message,true)}}
+</script></body></html>
