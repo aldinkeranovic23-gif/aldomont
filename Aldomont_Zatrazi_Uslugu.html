@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="bs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b121a"><title>Aldomont · Zatraži uslugu</title>
+<style>
+:root{--bg:#0b121a;--panel:#121e2a;--line:#26384a;--txt:#edf3f8;--muted:#91a3b5;--blue:#397fc3}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:16px system-ui,sans-serif}.wrap{max-width:650px;margin:35px auto;padding:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}.brand{font-size:22px;font-weight:800;margin-bottom:20px}.muted,label{color:var(--muted)}.field{display:grid;gap:7px;margin:14px 0}.field input,.field select,.field textarea{width:100%;padding:12px;border:1px solid var(--line);background:#0c1721;color:var(--txt);border-radius:9px;font:inherit}.field textarea{min-height:110px}.btn{padding:12px 17px;border:0;background:var(--blue);color:white;border-radius:9px;font:inherit;cursor:pointer;width:100%}.msg{padding:12px;border-radius:9px;background:#263746;margin:12px 0}.error{background:#402629;color:#ffcaca}small{color:var(--muted)}</style></head>
+<body><main class="wrap"><div class="brand">ALDOMONT <small>· Zatraži uslugu</small></div><section class="panel"><h1>Pošaljite zahtjev za posao</h1><p class="muted">Ispunite obrazac, a mi ćemo vas kontaktirati u najkraćem roku.</p><div id="msg" class="msg" hidden></div>
+<form id="requestForm">
+<div class="field"><label for="name">Ime i prezime *</label><input id="name" maxlength="160" required></div>
+<div class="field"><label for="phone">Broj telefona *</label><input id="phone" type="tel" maxlength="60" required></div>
+<div class="field"><label for="address">Adresa objekta / mjesto</label><input id="address" maxlength="250"></div>
+<div class="field"><label for="service">Koja usluga vam je potrebna? *</label><select id="service" required><option value="">Odaberite uslugu</option><option>Elektroinstalacije</option><option>Grijanje</option><option>Vodoinstalacije</option><option>Klimatizacija</option><option>Ostalo</option></select></div>
+<div class="field"><label for="description">Opišite šta vam je potrebno</label><textarea id="description" maxlength="3000" placeholder="Napišite ukratko šta treba uraditi..."></textarea></div>
+<button class="btn" id="send" type="submit">Pošalji zahtjev</button></form>
+<p><small>Slanjem obrasca pristajete da vas Aldomont kontaktira u vezi s ovim zahtjevom.</small></p></section></main>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase=createClient('https://tviagxfduewnrmsujowg.supabase.co','sb_publishable_B_z17D3TVdAoVh4dlRmJOQ_knIiL8t8');
+const form=document.getElementById('requestForm'),msg=document.getElementById('msg'),send=document.getElementById('send');
+form.addEventListener('submit',async e=>{e.preventDefault();send.disabled=true;send.textContent='Šaljem...';msg.hidden=true;
+const row={full_name:document.getElementById('name').value.trim(),phone:document.getElementById('phone').value.trim(),address:document.getElementById('address').value.trim()||null,service:document.getElementById('service').value,description:document.getElementById('description').value.trim()||null};
+const {error}=await supabase.from('service_requests').insert(row);
+send.disabled=false;send.textContent='Pošalji zahtjev';
+if(error){msg.textContent='Zahtjev nije poslan. Pokušajte ponovo ili nas nazovite.';msg.className='msg error';msg.hidden=false;return}
+form.reset();msg.textContent='Hvala! Vaš zahtjev je uspješno poslan. Aldomont će vas kontaktirati.';msg.className='msg';msg.hidden=false;
+});
+</script></body></html>
