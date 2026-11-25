@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b121a">
+<title>Aldomont | Klijentski portal</title>
+<style>
+:root{color-scheme:dark;--bg:#09121c;--panel:#111f2d;--line:#263b50;--text:#eef5fb;--muted:#9aafc2;--blue:#3988d4;--green:#247c5a;--red:#9d4149}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#183753 0,transparent 55%),var(--bg);color:var(--text);font:15px system-ui,-apple-system,sans-serif}
+.wrap{max-width:900px;margin:auto;padding:24px 16px 60px}
+.brand{display:flex;align-items:center;gap:12px;margin:10px 0 28px}
+.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,#8bcaff,#276aa8);display:grid;place-items:center;color:#071522;font-weight:900;font-size:22px}
+.muted{color:var(--muted)}
+h1{font-size:26px;margin:0 0 5px}
+h2{font-size:19px;margin:0 0 16px}
+.panel{background:rgba(17,31,45,.94);border:1px solid var(--line);border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 12px 34px #0002}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.tab,.btn{border:1px solid var(--line);border-radius:10px;padding:11px 15px;background:#1b3044;color:var(--text);font:inherit;cursor:pointer}
+.tab.active,.primary{background:var(--blue);border-color:var(--blue);color:white}
+.danger{background:#45252c;border-color:#79404a}
+.success{background:#194b3b;border-color:#287b5b}
+.tab:disabled,.btn:disabled{opacity:.55;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:#0c1926;border:1px solid var(--line);padding:15px;border-radius:13px}
+.stat b{display:block;font-size:21px;margin-top:7px}
+.offer{border:1px solid var(--line);border-radius:13px;padding:15px;margin:12px 0;background:#0d1a27}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pill{font-size:12px;border-radius:30px;padding:5px 9px;background:#263d53;color:#b9dcff}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{text-align:left;padding:10px 7px;border-bottom:1px solid var(--line)}
+.table th{color:var(--muted);font-size:12px}
+.scroll{overflow-x:auto}
+.field{display:grid;gap:7px;margin:12px 0}
+.field label{color:var(--muted);font-size:13px}
+input,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:#091622;color:var(--text);font:inherit}
+textarea{min-height:100px;resize:vertical}
+.notice{padding:13px;border-radius:11px;background:#193247;color:#c9e5ff;margin:12px 0}
+.error{background:#48272d;color:#ffd8dc}
+.hidden{display:none!important}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.empty{padding:20px 0;color:var(--muted)}
+.amount{font-size:25px;font-weight:800}
+@media(max-width:600px){
+.wrap{padding:16px 11px 40px}
+.panel{padding:15px}
+.grid{grid-template-columns:1fr 1fr}
+.grid .stat:last-child{grid-column:1/-1}
+.tab{flex:1 1 auto}
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<header class="brand">
+<div class="logo">A</div>
+<div>
+<b>Aldomont</b>
+<div class="muted">Klijentski portal</div>
+</div>
+</header>
+
+<div id="notice" class="notice">Učitavam siguran pristup…</div>
+
+<section id="portal" class="hidden">
+<h1 id="hello">Dobro došli</h1>
+<p class="muted">Ovdje možete pregledati ponude, pratiti plaćanja i poslati poruku Aldomontu.</p>
+
+<nav class="tabs">
+<button class="tab active" data-tab="offers">Ponude</button>
+<button class="tab" data-tab="payments">Plaćanja</button>
+<button class="tab" data-tab="contact">Kontakt i poruke</button>
+</nav>
+
+<section id="offers" class="panel">
+<h2>Vaše ponude</h2>
+<div id="offersList" class="empty">Učitavanje…</div>
+</section>
+
+<section id="payments" class="panel hidden">
+<h2>Pregled plaćanja</h2>
+<div id="paymentSummary"></div>
+<div id="paymentList" class="scroll"></div>
+</section>
+
+<section id="contact" class="panel hidden">
+<h2>Kontakt i poruke</h2>
+<p class="muted">Pošaljite pitanje ili poruku. Odgovorit ćemo vam čim budemo u mogućnosti.</p>
+<div id="messages"></div>
+
+<form id="messageForm">
+<div class="field">
+<label for="message">Vaša poruka</label>
+<textarea id="message" maxlength="3000" required placeholder="Napišite poruku…"></textarea>
+</div>
+<button class="btn primary" type="submit">Pošalji poruku</button>
+</form>
+</section>
+
+</section>
+</main>
+
+<script type="module">
+const SUPABASE_URL='https://tviagxfduewnrmsujowg.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_B_z17D3TVdAoVh4dlRmJOQ_knIiL8t8';
+const ENDPOINT=SUPABASE_URL+'/functions/v1/aldomont-portal';
+
+const $=id=>document.getElementById(id);
+const token=new URLSearchParams(location.search).get('token');
+let data=null;
+
+const money=n=>(Number(n)||0).toLocaleString('bs-BA',{minimumFractionDigits:2,maximumFractionDigits:2})+' KM';
+
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(body){
+const r=await fetch(ENDPOINT,{
+method:'POST',
+headers:{
+'Content-Type':'application/json',
+'apikey':SUPABASE_ANON_KEY,
+'Authorization':'Bearer '+SUPABASE_ANON_KEY
+},
+body:JSON.stringify(body)
+});
+const j=await r.json().catch(()=>({error:'Neispravan odgovor servera.'}));
+if(!r.ok)throw new Error(j.error||'Greška pri komunikaciji.');
+return j;
+}
+
+function statusLabel(s){
+return ({draft:'U pripremi',sent:'Poslana',accepted:'Prihvaćena',rejected:'Odbijena'})[s]||s||'—';
+}
+
+function renderOffers(){
+const list=data.offers||[];
+
+if(!list.length){
+$('offersList').innerHTML='<div class="empty">Trenutno nemate ponuda.</div>';
+return;
+}
+
+$('offersList').innerHTML=list.map(o=>`
+<article class="offer">
+<div class="row">
+<b>${esc(o.offer_number||'Ponuda')}</b>
+<span class="pill">${esc(statusLabel(o.status))}</span>
+</div>
+
+<p class="muted">${esc(o.description||'Ponuda Aldomont')} · ${o.created_at?new Date(o.created_at).toLocaleDateString('bs-BA'):''}</p>
+
+<div class="amount">${money(o.total)}</div>
+
+${o.valid_until?`<p class="muted">Važi do: ${esc(o.valid_until)}</p>`:''}
+
+<div class="scroll">
+<table class="table">
+<thead>
+<tr>
+<th>Opis</th>
+<th>Količina</th>
+<th>Cijena</th>
+<th>Ukupno</th>
+</tr>
+</thead>
+<tbody>
+${(o.items||[]).map(i=>`
+<tr>
+<td>${esc(i.description)}</td>
+<td>${esc(i.quantity)} ${esc(i.unit||'')}</td>
+<td>${money(i.unit_price)}</td>
+<td>${money(Number(i.quantity)*Number(i.unit_price))}</td>
+</tr>
+`).join('')}
+</tbody>
+</table>
+</div>
+
+${o.status==='sent'?`
+<div class="actions">
+<button class="btn success" data-response="accepted" data-id="${o.id}">Prihvatam ponudu</button>
+<button class="btn danger" data-response="rejected" data-id="${o.id}">Odbijam ponudu</button>
+</div>
+`:''}
+</article>
+`).join('');
+
+document.querySelectorAll('[data-response]').forEach(b=>b.addEventListener('click',()=>respond(b.dataset.id,b.dataset.response,b)));
+}
+
+async function respond(id,response,b){
+const msg=response==='accepted'?'Da li potvrđujete prihvatanje ove ponude?':'Da li potvrđujete odbijanje ove ponude?';
+
+if(!confirm(msg))return;
+
+b.disabled=true;
+
+try{
+await api({action:'offer_response',token,offer_id:id,response});
+await load();
+
+$('notice').textContent=response==='accepted'?'Ponuda je prihvaćena. Hvala na potvrdi.':'Ponuda je odbijena. Hvala na odgovoru.';
+$('notice').classList.remove('hidden');
+}catch(e){
+alert(e.message);
+b.disabled=false;
+}
+}
+
+function renderPayments(){
+const jobs=data.jobs||[];
+const payments=data.payments||[];
+
+const total=jobs.reduce((s,j)=>s+Number(j.agreed_price||0),0);
+const paid=payments.filter(p=>p.transaction_type==='income').reduce((s,p)=>s+Number(p.amount||0),0);
+const due=Math.max(0,total-paid);
+
+$('paymentSummary').innerHTML=`
+<div class="grid">
+<div class="stat"><span class="muted">Dogovoreno</span><b>${money(total)}</b></div>
+<div class="stat"><span class="muted">Uplaćeno</span><b>${money(paid)}</b></div>
+<div class="stat"><span class="muted">Preostalo</span><b>${money(due)}</b></div>
+</div>
+`;
+
+const rows=payments.filter(p=>p.transaction_type==='income');
+
+$('paymentList').innerHTML=rows.length?
+`
+<table class="table">
+<thead><tr><th>Datum</th><th>Opis</th><th>Iznos</th></tr></thead>
+<tbody>
+${rows.map(p=>`
+<tr>
+<td>${esc(p.transaction_date||'—')}</td>
+<td>${esc(p.description||p.category||'Uplata')}</td>
+<td>${money(p.amount)}</td>
+</tr>
+`).join('')}
+</tbody>
+</table>
+`:
+'<div class="empty">Još nema evidentiranih uplata.</div>';
+}
+
+function renderMessages(){
+const ms=data.messages||[];
+
+$('messages').innerHTML=ms.length?
+ms.map(m=>`
+<div class="offer">
+<div class="row">
+<b>${m.sender==='client'?'Vi':'Aldomont'}</b>
+<small class="muted">${new Date(m.created_at).toLocaleString('bs-BA')}</small>
+</div>
+<p>${esc(m.body)}</p>
+</div>
+`).join(''):
+'<div class="empty">Još nema poruka.</div>';
+}
+
+async function load(){
+data=await api({action:'portal_get',token});
+
+$('hello').textContent='Dobro došli, '+(data.client?.name||'');
+
+renderOffers();
+renderPayments();
+renderMessages();
+
+$('portal').classList.remove('hidden');
+$('notice').classList.add('hidden');
+}
+
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{
+document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));
+
+['offers','payments','contact'].forEach(x=>$(x).classList.toggle('hidden',x!==b.dataset.tab));
+}));
+
+$('messageForm').addEventListener('submit',async e=>{
+e.preventDefault();
+
+const body=$('message').value.trim();
+if(!body)return;
+
+const b=e.submitter;
+b.disabled=true;
+
+try{
+await api({action:'send_message',token,body});
+$('message').value='';
+await load();
+document.querySelector('[data-tab="contact"]').click();
+}catch(err){
+alert(err.message);
+}finally{
+b.disabled=false;
+}
+});
+
+if(!token){
+$('notice').textContent='Nedostaje pristupni link. Otvorite portal putem linka koji ste dobili od Aldomonta.';
+$('notice').classList.add('error');
+}else{
+load().catch(e=>{
+$('notice').textContent=e.message;
+$('notice').classList.add('error');
+});
+}
+</script>
+
+</body>
+</html>
