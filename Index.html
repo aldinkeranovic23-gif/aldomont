@@ -274,7 +274,24 @@ table{border-collapse:separate;border-spacing:0;min-width:560px}th{background:#1
  <p class="muted" style="font-size:12px;margin-bottom:0">Napomena: „Neto priliv“ je obračun uplata minus evidentirani troškovi za izabrani mjesec. Nije konačna računovodstvena dobit i ne uključuje troškove koji nisu uneseni.</p>
 </section>
 </section></div>
-<script>window.addEventListener("error",e=>{const m=document.getElementById("loginMsg");if(m){m.textContent="JavaScript greška: "+(e.message||"nepoznata greška");m.classList.remove("hidden");m.classList.add("error")}});window.addEventListener("unhandledrejection",e=>{const m=document.getElementById("loginMsg");if(m){m.textContent="Greška učitavanja: "+(e.reason?.message||String(e.reason||"nepoznata greška"));m.classList.remove("hidden");m.classList.add("error")}});</script>
+<script>
+window.addEventListener("error", function(e) {
+  const m = document.getElementById("loginMsg");
+  if (m) {
+    m.textContent = "GREŠKA: " + e.message + " | " + e.filename + " | linija: " + e.lineno + " | kolona: " + e.colno;
+    m.classList.remove("hidden");
+    m.classList.add("error");
+  }
+});
+window.addEventListener("unhandledrejection", function(e) {
+  const m = document.getElementById("loginMsg");
+  if (m) {
+    m.textContent = "PROMISE: " + String(e.reason);
+    m.classList.remove("hidden");
+    m.classList.add("error");
+  }
+});
+</script>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const SUPABASE_URL='https://tviagxfduewnrmsujowg.supabase.co';
